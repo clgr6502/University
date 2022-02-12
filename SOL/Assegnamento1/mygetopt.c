@@ -7,6 +7,7 @@
 #include <string.h>
 
 int mygetopt(int argc, char **argv);
+long isNumber(const char *s);
 
 int main(){
    if(argc < 2){
@@ -32,15 +33,27 @@ int mygetopt(int argc, char **argv){
             case 'm':
                if(j == strlen(argv[i]) - 1){
                   i++;
+                  
+                  long num = isNumber(argv[i]);
+                  
                   if(argv[i][0] != '-'){
-                     printf("%d ", atoi(argv[i]));
+                     if(num != -1){
+                        printf("%ld ", num);
+                     }else{
+                        printf("Non è un numero ");
+                     }
                   }else{
                      printf("Errore, <numero> mancante");
                      continue;
                   }
                }else{
-                  int num = (int) strtol(&argv[i][j + 1], NULL, 10);
-                  printf("%d ", num);
+                  long num = isNumber(&argv[i][j++]);
+                  
+                  if(num != -1){
+                     printf("%ld ", num);
+                  }else{
+                     printf("Non è un numero ");
+                  }
                }
             break;
             case 's':
@@ -65,4 +78,11 @@ int mygetopt(int argc, char **argv){
       }
    }
    printf("\n");
+}
+
+long isNumber(const char *s){
+   char* e = NULL;
+   long val = strtol(s, &e, 0);
+   if (e != NULL && *e == (char)0) return val; 
+   return -1;
 }
