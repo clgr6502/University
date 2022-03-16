@@ -1,0 +1,108 @@
+<html>
+	<head>
+		<script type="text/javascript">
+			var gl = null;
+			var positionAttribIndex = 0;
+
+			function setupWebGL(){
+				<!-- "canvas" prende il canvas con l'id "Tela" -->
+				var canvas = document.getElementById("Tela");
+				gl = canvas.getContext("experimental-webgl");
+			}
+
+			function setupWhatToDraw() {
+				//questo rappresenta una lista di oggetti
+				var positions = [
+						0.0, 0.0, // 1st vertex
+						1.0, 0.0, // 2nd vertex
+						0.0, 1.0 // 3rd vertex
+				];
+				//questo invece un array ordinato POSIZIONI
+				var typedPositions = new Float32Array(positions);
+				//creo un buffer
+				var positionsBuffer = gl.createBuffer();
+
+				//eseguo il binding in ARRAY_BUFFER (target) a 
+				//partire da positionsBuffer
+				gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, typedPositions,gl.STATIC_DRAW);
+
+				//Utilizza la cella '0'
+				gl.enableVertexAttribArray(positionAttribIndex);
+
+				//gl.bindBuffer(gl.ARRAY_BUFFER, positionsBuffer)
+				//(posizione, #valori per vertice, tipo, dati normalizzati
+				// in un dato intervallo, "stride", offset)
+				gl.vertexAttribPointer(positionAttribIndex,
+					2, gl.FLOAT, false, 0, 0);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, null);
+				}
+
+
+			function setupHowToDraw() {
+				// vertex shader (della pipeline)
+				//sorgente
+				//creazione shader di tipo VERTEX_SHADER
+				var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+
+				var vsSource =`
+				//attribute = input
+				attribute vec2 aPosition;
+
+				void main(void)
+				{
+					//valori in output per il fragment shader
+					gl_Position = vec4(aPosition, 0.0, 1.0);
+				}
+				`;
+				gl.shaderSource(vertexShader, vsSource);
+				gl.compileShader(vertexShader);
+
+				// fragment shader
+				var fsSource = `
+				precision lowp float;
+
+				void main(void)
+				{
+					gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+				}
+				`;
+				var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+				gl.shaderSource(fragmentShader, fsSource);
+				gl.compileShader(fragmentShader);
+					
+				var program = gl.createProgram();
+				gl.attachShader(program, vertexShader);
+				gl.attachShader(program, fragmentShader);
+
+				gl.bindAttribLocation(program, positionAttribIndex, "aPosition");
+				gl.linkProgram(program);
+				gl.useProgram(program);
+			}
+
+			function draw() {
+				gl.clearColor(1.0, 1.0, 1.0, 1.0);
+				gl.clear(gl.COLOR_BUFFER_BIT);
+				gl.drawArrays(gl.TRIANGLES, 0, 3);
+			}
+
+			function helloDraw(){
+				setupWebGL();
+				setupWhatToDraw();
+				setupHowToDraw();
+				draw();
+			}
+
+			window.onload = helloDraw;
+		</script>
+	</head>
+  
+	<body>
+		<canvas id="Tela"
+			width="200px" height="200px" 
+			style="border: 1px solid black">
+		</canvas>
+	</body>
+</html>
