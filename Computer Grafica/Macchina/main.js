@@ -87,7 +87,7 @@ function draw(){
    translate_matrix = glMatrix.mat4.create();
    axis_matrix = glMatrix.mat4.create();
 
-   //per ogni vertice del triangolo
+   //Assi x, y, z dello spazio
    for(var i=0; i < 3; ++i){
       var color_translate = [0.0,0.0,0.0];
       var scaling = [0.01,0.01,0.01]; 
