@@ -1,7 +1,3 @@
-//Versione funzionante
-//Possibili typo (riscritto a mano)
-//TODO: gestione errori
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,37 +18,41 @@ int main(){
 
 int mygetopt(int argc, char **argv){
    int i = 1;
+   int j;
+      
    while(i < argc){
-      int j = 0;
+      j = 0;
       if(argv[i][j] == '-'){
          while(argv[i][j] == '-'){
             j++;
          }
+         long num = 0;
+
          switch(argv[i][j]){
             case 'n':
             case 'm':
                if(j == strlen(argv[i]) - 1){
+                  //passa al prossimo argomento
                   i++;
-                  
-                  long num = isNumber(argv[i]);
-                  
+                  num = isNumber(argv[i]);
+
                   if(argv[i][0] != '-'){
-                     if(num != -1){
-                        printf("%ld ", num);
+                     if(num == -1){
+                        printf("Argomento non valido ");
                      }else{
-                        printf("Non è un numero ");
+                        printf("%ld ", num);
                      }
                   }else{
-                     printf("Errore, <numero> mancante");
+                     printf("Errore: numero mancante ");
                      continue;
                   }
                }else{
-                  long num = isNumber(&argv[i][j++]);
-                  
-                  if(num != -1){
-                     printf("%ld ", num);
+                  j++;
+                  num = isNumber(&argv[i][j]);
+                  if(num == -1){
+                     printf("Argomento non valido ");
                   }else{
-                     printf("Non è un numero ");
+                     printf("%ld ", num);
                   }
                }
             break;
