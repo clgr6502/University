@@ -43,7 +43,6 @@ void tokenizer_r(char *token, char *div){
 
 int main(int argc, char **argv){
    if(argc != 4){
-printf("%d\n", argc);
       printf("Utilizzo: ./nomeprog stringa1 stringa2 1/0\n");
       printf("1/0: rientrante si/no\n");
       exit(1);
