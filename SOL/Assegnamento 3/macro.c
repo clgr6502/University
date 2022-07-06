@@ -19,6 +19,7 @@
       EXIT_FAILURE; \
    }
 
+//Per lavorare sulle matrici
 #define ELEM(m, i, j) (m + i)[j]
 
 int main(){
