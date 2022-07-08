@@ -8,67 +8,87 @@
 
 int main(int argc, char **argv){
    if(argc == 1){
-      printf("Utilizzo: mywc [-l -w] file1 [file2 file3 …]");
+      printf("Utilizzo: mywc [-l -w] file1 [file2 file3 ….]\n");
       exit(1);
    }
  
-   FILE *in = fopen(argv[1], "r");
+   FILE *in;
+   int lenmax = 100;
 
-   int wflag = lflag = 0;
-   int wcounter = 0;
-   int scounter = 0;
+   int wflag       = 0;
+   int lflag       = 0;
+   int wcounter    = 0;
+   int scounter    = 0;
    int ctrlcounter = 0;
-   int lcount = 0;
+   int charcounter = 0;
+   int lcounter    = 0;
 
    char *line = malloc(sizeof(char*) * LENMAX);
    int opt;
 
-   while((opt = getopt(argc, argv, "lw:")) != -1){
+   while((opt = getopt(argc, argv, "lw")) != -1){
       switch(opt){
-         case 'w'':
+         case 'w':
             wflag = 1;
          break;
-
          case 'l':
             lflag = 1;
          break;
-
          default:
             printf("Argomento sconosciuto.\n");
          break;
       }
    }
 
+   if(wflag == 0 && lflag == 0){
+      in = fopen(argv[1], "r");
+   }else{
+      in = fopen(argv[2], "r");
+   }
+
    if(in == NULL){
       printf("Errore nell'apertura del file.\n");
       exit(1);
    }
+   while(!feof(in)){
+      getline(&line, &lenmax, in);
+      lcounter++;
 
-   do{
-      fscaf(in, "%^[\n]%*c", line);
-
-      if(lflag){
-         lcount++;
-      }
-
-      for(int i = 0; i < strlen(line); i++){
-         if(isspace(line[i])){
+      int i = 0;
+      while(i < strlen(line)){
+         if(isspace(line[i]) && !iscntrl(line[i])){
             scounter++;
-         }else if(isctrl(line[i])){
+            i++;
+         }else if(iscntrl(line[i])){
             ctrlcounter++;
-         }else if(wflag){
-               wcounter++;
+            i++;
+         }else{
+            wcounter++;
+            charcounter++;
+            i++;
+            while(!isspace(line[i]) && !iscntrl(line[i])){
+               charcounter++;
                i++;
-               while(!isspace(line[i])){
-                  i++;
-               }
             }
          }
       }
-   }while(!feof(in));
-   
+   }
+      
+   if(!wflag && !lflag){
+      printf("Parole, righe, caratteri, spazi, ctrl\n");
+      printf("%d, %d, %d, %d, %d\n", wcounter, lcounter, charcounter, scounter, ctrlcounter);
+   }else if(wflag && !lflag){
+      printf("Parole\n");
+      printf("%d\n", wcounter);
+   }else if(!wflag && lflag){
+      printf("Righe\n");
+      printf("%d\n", lcounter);
+   }else{
+      printf("Parole, righe\n");
+      printf("%d, %d\n", wcounter, lcounter);
+   }
+
    free(line);
    free(in);
-
    return 0;
 }
