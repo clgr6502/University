@@ -6,6 +6,9 @@
 
 #define LENMAX 100
 
+void stampa(int lflag, int wflag, int w, int l,
+   int s, int ct, int ch, char *nomefile);
+
 int main(int argc, char **argv){
    if(argc == 1){
       printf("Utilizzo: mywc [-l -w] file1 [file2 file3 ….]\n");
@@ -23,7 +26,6 @@ int main(int argc, char **argv){
    int charcounter = 0;
    int lcounter    = 0;
 
-   char *line = malloc(sizeof(char*) * LENMAX);
    int opt;
 
    while((opt = getopt(argc, argv, "lw")) != -1){
@@ -40,55 +42,75 @@ int main(int argc, char **argv){
       }
    }
 
+   int index = 0;
+
    if(wflag == 0 && lflag == 0){
-      in = fopen(argv[1], "r");
+      index = 1;
    }else{
-      in = fopen(argv[2], "r");
+      index = 2;
    }
 
-   if(in == NULL){
-      printf("Errore nell'apertura del file.\n");
-      exit(1);
-   }
-   while(!feof(in)){
-      getline(&line, &lenmax, in);
-      lcounter++;
+   char *line;
 
-      int i = 0;
-      while(i < strlen(line)){
-         if(isspace(line[i]) && !iscntrl(line[i])){
-            scounter++;
-            i++;
-         }else if(iscntrl(line[i])){
-            ctrlcounter++;
-            i++;
-         }else{
-            wcounter++;
-            charcounter++;
-            i++;
-            while(!isspace(line[i]) && !iscntrl(line[i])){
+   while(index < argc){
+      in = fopen(argv[index], "r");
+      line = malloc(sizeof(char*) * LENMAX);
+
+      if(in == NULL){
+         printf("Errore nell'apertura del file.\n");
+         exit(1);
+      }
+
+      while(!feof(in)){
+         getline(&line, &lenmax, in);
+         lcounter++;
+
+         int i = 0;
+         while(i < strlen(line)){
+            if(isspace(line[i]) && !iscntrl(line[i])){
+               scounter++;
+               i++;
+            }else if(iscntrl(line[i])){
+               ctrlcounter++;
+               i++;
+            }else{
+               wcounter++;
                charcounter++;
                i++;
+
+               while(!isspace(line[i]) && !iscntrl(line[i])){
+                  charcounter++;
+                  i++;
+               }
             }
          }
       }
+
+      stampa(lflag, wflag, wcounter, lcounter, scounter, ctrlcounter, charcounter, argv[index]);
+
+      free(line);
+      fclose(in);
+
+      index++;
    }
-      
+   return 0;
+}
+
+void stampa(int lflag, int wflag, int w, int l,
+   int s, int ct, int ch, char *nomefile){
+   printf("%s: ", nomefile);
    if(!wflag && !lflag){
       printf("Parole, righe, caratteri, spazi, ctrl\n");
-      printf("%d, %d, %d, %d, %d\n", wcounter, lcounter, charcounter, scounter, ctrlcounter);
+      printf("%d, %d, %d, %d, %d\n", w, l, ch, s, ct);
    }else if(wflag && !lflag){
       printf("Parole\n");
-      printf("%d\n", wcounter);
+      printf("%d\n", w);
    }else if(!wflag && lflag){
       printf("Righe\n");
-      printf("%d\n", lcounter);
+      printf("%d\n", l);
    }else{
       printf("Parole, righe\n");
-      printf("%d, %d\n", wcounter, lcounter);
+      printf("%d, %d\n", w, l);
    }
-
-   free(line);
-   free(in);
-   return 0;
+   return; 
 }
