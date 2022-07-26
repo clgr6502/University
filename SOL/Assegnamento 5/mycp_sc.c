@@ -67,6 +67,10 @@ printf("main\n");
       }
    }
 
+   free(path1);
+   free(path2);
+   free(percorso);
+   
    closedir(src);
    closedir(dst);
    return 0;
@@ -140,6 +144,11 @@ printf("subdir\n");
          }
       }
    }
+   
+   free(path1);
+   free(path2);
+   free(percorso);
+   
    closedir(src);
 
    return;
