@@ -2,93 +2,105 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include <sys/type.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <dirent.h>
+#include <error.h>
+
+#define MAX 128
 
 void myfind(char *dir, char *file, char *path, int *flag);
+int isFile(struct stat buf);
+int isDir(struct stat buf);
 
 int main(int argc, char **argv){
    int flag = 0;
+
    if(argc < 3){
       printf("Troppi pochi argomenti\n");
       exit(1);
    }
- 
-   struct stat stbuf;
 
-   if(stat(argv[1], &stbuf) == -1){
-      printf("Errore: non è una directory\n");
-      exit(1);
-   }
-
-   DIR *dfd;
-   Dirent *dp;
-
-   if((dfd = opendir(argv[1])) == NULL){
-      printf("Impossibile aprire la directory\n");
-      exit(1);
-   }
-
-   char *path = malloc(512);
+   char *path = malloc(MAX);
 
    for(int i = 2; i < argc; i++){
-      while((dp = readdir(dfd) != NULL){
-         if(strcmp(dp->name, "..") == 0 ||
-            strcmp(dp->name,  ".") == 0){
-            continue;
-         }else if(!S_ISDIR(stbuf.st_mode)){
-            if(strcmp(dp->name, argv[i]) == 0){
-               getcwd(path, 512);
-               flag = 1;
-            }
-         }else{
-            myfind(dp->name, argv[1], &path, &flag);
-         }
+      flag = 0;
+      myfind(argv[1], argv[i], path, &flag);
+
+      if(flag){
+         printf("Trovato %s: %s\n", argv[i], path);
+      }else{
+         printf("%s non trovato\n", argv[i]);
       }
+      printf("------------\n");
    }
 
-   if(flag)
-      printf("%s\n", path);
-   else
-      printf("File non trovato\n");
-
    free(path);
-   closedir(dp);
 
    return 0;
 }
 
-void myfind(char *dir, char *file, char *path, int flag){
+void myfind(char *dir, char *file, char *path, int *flag){
+   //Per caricare i dati del file/directory
    struct stat stbuf;
+   struct stat st;
 
-   if(stat(dir, &stbuf) == -1){
-      printf("Errore: non è una directory\n");
+printf("<%s>\n", dir);
+   char *atDir = malloc(MAX);
+   sprintf(atDir, "%s/%s", getcwd(atDir, MAX), dir);
+
+printf("[%s]\n", atDir);
+   if(stat(atDir, &stbuf) == -1){
+      perror("Errore");
       exit(1);
    }
+
+   char *nome = malloc(MAX);
+   char *perc = malloc(MAX);
 
    DIR *dfd;
-   Dirent *dp;
+   struct dirent *dp;
 
-   if((dfd = opendir(dir)) == NULL){
-      printf("Impossibile aprire la directory\n");
+   if((dfd = opendir(atDir)) == NULL){
+      perror("Impossibile aprire la directory");
       exit(1);
    }
 
-   char *path = malloc(512);
+   while((dp = readdir(dfd)) != NULL){
+      strcpy(nome, dp->d_name);
+      sprintf(perc, "%s/%s", dir, nome);
 
-   while((dp = readdir(dfd) != NULL){
-      if(strcmp(dp->name, "..") == 0 ||
-         strcmp(dp->name,  ".") == 0){
-         continue;
-      }else if(!S_ISDIR(stbuf.st_mode)){
-         if(strcmp(dp->name, file) == 0){
-            getcwd(path, 512);
-            *flag = 1;
+      if(stat(perc, &st) != -1){
+         if(strcmp(nome, "..") == 0 ||
+            strcmp(nome,  ".") == 0){
+            continue;
+         }else if(isDir(st)){
+            sprintf(perc, "%s/%s", atDir, nome);
+printf("%s\n", perc);
+chdir(perc);
+            myfind(nome, file, path, flag);
+         }else{
+            if(strcmp(nome, file) == 0){
+               *flag = 1;
+               sprintf(path, "%s/%s", atDir, file);
+               return;
+            }
          }
-      }else{
-         myfind(dp->name, file, path, *flag);
       }
    }
+
+   closedir(dfd);
+   free(nome);
+   free(perc);
+   free(atDir);
+
    return;
+}
+
+int isDir(struct stat buf){
+   if(S_ISDIR(buf.st_mode)){
+      return 1;
+   }
+   return 0;
 }
