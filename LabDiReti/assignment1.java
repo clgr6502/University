@@ -24,7 +24,6 @@ class Main{
 
       if(thread.isAlive()){
          thread.interrupt();
-         //System.out.println("Max time exceeded");
       }
    }
 }
