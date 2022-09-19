@@ -1,7 +1,7 @@
 import java.util.*;
 import java.lang.*;
 
-class Main{
+class Ass1{
    public static void main(String[] args){
       float accuracy;
       long time;
