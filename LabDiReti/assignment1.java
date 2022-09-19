@@ -7,6 +7,8 @@ class Main{
       long time;
 
       Scanner in = new Scanner(System.in);
+      
+      //System.
       accuracy = in.nextFloat();
       time = in.nextInt();
 
