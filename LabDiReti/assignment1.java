@@ -8,8 +8,10 @@ class Main{
 
       Scanner in = new Scanner(System.in);
       
-      //System.
+      System.out.println("Inserire la precisione: ");
       accuracy = in.nextFloat();
+      
+      System.out.println("Inserire il tempo massimo: ");
       time = in.nextInt();
 
       Calculator piCalc = new Calculator(accuracy);
