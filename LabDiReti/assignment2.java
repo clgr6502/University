@@ -1,50 +1,40 @@
 import java.util.*;
-import java.lang.*;
 import java.util.concurrent.*;
+import java.lang.*;
 
-class Assignment2{
+class Main4{
    public static void main(String args[]){
       int max = Integer.parseInt(args[0]);
+      int nthread = Integer.parseInt(args[1]);
 
-      Ufficio ufficio = new Ufficio(max);
-      ufficio.esegui();
+      Server server = new Server(max, nthread);
+      server.esegui();
    }
 }
 
-//Classe che rappresenta il ThreadPool
-class Ufficio{
+class Server{
    private ExecutorService pool;
 
-   private ArrayBlockingQueue<Task> sala;
-   private int k = 5;
+   private int k;
+   private int max;
 
-   public Ufficio(int max){
-      pool = new ThreadPoolExecutor(4, 4, 0L, TimeUnit.SECONDS,
-      new ArrayBlockingQueue<>(4));
+   public Server(int max, int nthread){
+      this.max = max;
+      this.k = nthread;
 
-      sala = new ArrayBlockingQueue(max);
-      this.k = max;
+      pool = Executors.newFixedThreadPool(k);
    }
 
    public void esegui(){
-      //Riempio la coda con i tasks
-      for(int i = 0; i < k; i++){
-         sala.add(new Task(i));
+      for(int i = 0; i < max; i++){
+         Task task = new Task(i);
+         pool.execute(task);
       }
-
-      //Svuoto la coda
-      while(!sala.isEmpty()){
-         try{
-            pool.execute(sala.peek());
-            sala.remove();
-         }catch(RejectedExecutionException e){}
-      }
-
       pool.shutdown();
-      //RICHIESTA OPZIONALE
+
       try{
          if(!pool.awaitTermination(60, TimeUnit.SECONDS)){
-            System.out.println(Thread.currentThread().getName() + "e' stato inattivo per troppo tempo");
+            System.out.println("Thread inattivo per troppo tempo");
             pool.shutdownNow();
          }
       }catch(InterruptedException e){
@@ -54,21 +44,16 @@ class Ufficio{
 }
 
 class Task implements Runnable{
-   private int id;
+   private int id;   
 
    public Task(int id){
       this.id = id;
    }
 
    public void run(){
-      System.out.println("----------------");
-      System.out.println("Entra il cliente " + id);
-
       try{
-         Long duration = (long)(Math.random() * 1000);
-         System.out.println("[" + Thread.currentThread().getName() + "]" + " completa " + id + " in " + duration + "ms");
-         System.out.println("");
-         Thread.sleep(duration);
+         System.out.println("Task " + id + " in esecuzione");
+         Thread.sleep(1000);
       }catch(InterruptedException e){
          e.printStackTrace();
       }
