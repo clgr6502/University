@@ -6,13 +6,13 @@
 int anagramma(unsigned char *s1, unsigned char *s2);
 
 int main(){
-   unsigned char s1[MAX];
-   unsigned char s2[MAX];
+   unsigned char stringa1[MAX];
+   unsigned char stringa2[MAX];
 
-   scanf("%s", s1);
-   scanf("%s", s2);
+   scanf("%s", stringa1);
+   scanf("%s", stringa2);
 
-   printf("%d\n", anagramma(s1, s2));
+   printf("%d\n", anagramma(stringa1, stringa2));
 
    return 0;
 }
